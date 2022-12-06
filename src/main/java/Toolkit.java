@@ -12,13 +12,56 @@ public class Toolkit {
 
     public static void loadGLOVE() throws IOException {
         BufferedReader myReader = null;
-        //TODO Task 5.1
+        //TODO_Completed Task 5.1
+        if(listVectors == null)
+            listVectors = new ArrayList<>();
+        if(listVocabulary == null)
+            listVocabulary = new ArrayList<>();
+        try {
+            File fileFromResource = Toolkit.getFileFromResource(FILENAME_GLOVE);
+            myReader = new BufferedReader(new FileReader(fileFromResource));
+            String line = myReader.readLine();
+            while (line != null) {
+                //System.out.println(line);
+                // read next line
+                String[] split = line.split(",");
+                listVocabulary.add(split[0]);
+                double[] vectors = new double[split.length-1];
+                for (int i = 1; i < split.length; i++) {
+                    vectors[i-1] = Double.parseDouble(split[i]);
+                }
+                listVectors.add(vectors);
+
+                line = myReader.readLine();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            if (myReader != null)
+                myReader.close();
+        }
     }
 
     public static List<String> loadStopWords() throws IOException {
         List<String> listStopWords = new ArrayList<>();
         BufferedReader myReader = null;
-        //TODO Task 5.2
+        //TODO_Completed Task 5.2
+        try {
+            File fileFromResource = Toolkit.getFileFromResource(FILENAME_STOPWORDS);
+            myReader = new BufferedReader(new FileReader(fileFromResource));
+            String line = myReader.readLine();
+            while (line != null) {
+                //System.out.println(line);
+                // read next line
+                listStopWords.add(line);
+                line = myReader.readLine();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            if (myReader != null)
+                myReader.close();
+        }
         return listStopWords;
     }
 
