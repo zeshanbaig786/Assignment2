@@ -1,4 +1,5 @@
 import org.apache.commons.lang3.time.StopWatch;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,27 +48,65 @@ public class SemanticMain {
 
     public List<Glove> CreateGloveList() {
         List<Glove> listResult = new ArrayList<>();
+        int len = listVocabulary.size();
+        for (int i = 0; i < len; i++) {
+            String word = listVocabulary.get(i);
+            if (!STOPWORDS.contains(word)) {
+                listResult.add(new Glove(word, new Vector(listVectors.get(i))));
+            }
+        }
         //TODO Task 6.1
-        return null;
+        return listResult;
     }
 
     public List<CosSimilarityPair> WordsNearest(String _word) {
         List<CosSimilarityPair> listCosineSimilarity = new ArrayList<>();
         //TODO Task 6.2
-        return null;
+        Vector sourceVector = null, errorVector = null;
+        int sourceIndex = -1, errorIndex = -1;
+        for (int i = 0; i < listGlove.size(); i++) {
+            if (listGlove.get(i).getVocabulary().equals(_word)) {
+                sourceVector = listGlove.get(i).getVector();
+                sourceIndex = i;
+            }
+            if (listGlove.get(i).getVocabulary().equals("error")) {
+                errorVector = listGlove.get(i).getVector();
+                errorIndex = i;
+            }
+        }
+        if (sourceVector == null) {
+            sourceVector = errorVector;
+            sourceIndex = errorIndex;
+        }
+        for (Glove glove : listGlove) {
+            if (glove.getVocabulary().equals(_word))
+                continue;
+            double cosineSimilarity = glove.getVector().cosineSimilarity(sourceVector);
+            CosSimilarityPair cosSimilarityPair = new CosSimilarityPair(_word, glove.getVocabulary(), cosineSimilarity);
+            listCosineSimilarity.add(cosSimilarityPair);
+        }
+        return HeapSort.doHeapSort(listCosineSimilarity);
     }
 
     public List<CosSimilarityPair> WordsNearest(Vector _vector) {
         List<CosSimilarityPair> listCosineSimilarity = new ArrayList<>();
+        //TODO Task 6.2
+        for (Glove glove : listGlove) {
+            if (glove.getVector().equals(_vector))
+                continue;
+            double cosineSimilarity = glove.getVector().cosineSimilarity(_vector);
+            CosSimilarityPair cosSimilarityPair = new CosSimilarityPair(_vector, glove.getVocabulary(), cosineSimilarity);
+            listCosineSimilarity.add(cosSimilarityPair);
+        }
         //TODO Task 6.3
-        return null;
+        return HeapSort.doHeapSort(listCosineSimilarity);
     }
 
     /**
      * Method to calculate the logical analogies by using references.
      * <p>
      * Example: uk is to london as china is to XXXX.
-     *       _firISRef  _firTORef _secISRef
+     * _firISRef  _firTORef _secISRef
      * In the above example, "uk" is the first IS reference; "london" is the first TO reference
      * and "china" is the second IS reference. Moreover, "XXXX" is the vocabulary(ies) we'd like
      * to get from this method.
@@ -83,6 +122,25 @@ public class SemanticMain {
     public List<CosSimilarityPair> LogicalAnalogies(String _secISRef, String _firISRef, String _firTORef, int _top) {
         List<CosSimilarityPair> listResult = new ArrayList<>();
         //TODO Task 6.4
-        return null;
+        Vector vecFirIsRef = null;
+        Vector vecFirToRef = null;
+        Vector vecSecIsRef = null;
+        for (Glove glove : listGlove) {
+            if (glove.getVocabulary().equals(_firISRef))
+                vecFirIsRef = glove.getVector();
+            else if (glove.getVocabulary().equals(_firTORef))
+                vecFirToRef = glove.getVector();
+            else if (glove.getVocabulary().equals(_secISRef))
+                vecSecIsRef = glove.getVector();
+            if (vecSecIsRef != null && vecFirIsRef != null && vecFirToRef != null)
+                break;
+        }
+        if (vecSecIsRef != null && vecFirIsRef != null && vecFirToRef != null) {
+            Vector newVec = vecSecIsRef.subtraction(vecFirIsRef.add(vecFirToRef));
+            listResult = WordsNearest(newVec);
+        }
+        if (listResult.size() > _top)
+            return listResult.subList(listResult.size() - _top, listResult.size());
+        return listResult;
     }
 }

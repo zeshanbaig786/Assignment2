@@ -13,10 +13,10 @@ public class Toolkit {
     public static void loadGLOVE() throws IOException {
         BufferedReader myReader = null;
         //TODO_Completed Task 5.1
-        if(listVectors == null)
-            listVectors = new ArrayList<>();
-        if(listVocabulary == null)
-            listVocabulary = new ArrayList<>();
+        //if(listVectors == null)
+        listVectors = new ArrayList<>();
+        //if(listVocabulary == null)
+        listVocabulary = new ArrayList<>();
         try {
             File fileFromResource = Toolkit.getFileFromResource(FILENAME_GLOVE);
             myReader = new BufferedReader(new FileReader(fileFromResource));
@@ -26,9 +26,9 @@ public class Toolkit {
                 // read next line
                 String[] split = line.split(",");
                 listVocabulary.add(split[0]);
-                double[] vectors = new double[split.length-1];
+                double[] vectors = new double[split.length - 1];
                 for (int i = 1; i < split.length; i++) {
-                    vectors[i-1] = Double.parseDouble(split[i]);
+                    vectors[i - 1] = Double.parseDouble(split[i]);
                 }
                 listVectors.add(vectors);
 

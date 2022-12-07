@@ -42,22 +42,35 @@ public class Vector {
         double[] newDoubElements = new double[_size];
         for (int i = 0; i < _size; i++) {
             if (i >= doubElements.length)
-                newDoubElements[i] = -1;
+                newDoubElements[i] = -1.0d;
             else
                 newDoubElements[i] = doubElements[i];
         }
         return new Vector(newDoubElements);
     }
 
+    /**
+     * @param me    self vector
+     * @param other other vector
+     * @return 0 index has resized me vector, 1 index has resized to vector
+     */
+    private static Vector[] makeEqualSize(Vector me, Vector other) {
+        Vector[] toReturn = new Vector[2];
+        toReturn[0] = me;
+        toReturn[1] = other;
+        if (toReturn[1].getVectorSize() > toReturn[0].getVectorSize())
+            toReturn[0] = toReturn[0].reSize(toReturn[1].getVectorSize());
+        else if (toReturn[0].getVectorSize() > toReturn[1].getVectorSize()) {
+            toReturn[1] = toReturn[1].reSize(toReturn[0].getVectorSize());
+        }
+        return toReturn;
+    }
+
     public Vector add(Vector _v) {
         //TODO_Completed Task 1.7
-        Vector me = this;
-        Vector other = _v;
-        if (other.getVectorSize() > this.getVectorSize())
-            me = me.reSize(other.getVectorSize());
-        else if (this.getVectorSize() > other.getVectorSize()) {
-            other = other.reSize(me.getVectorSize());
-        }
+        Vector[] vectors = makeEqualSize(this, _v);
+        Vector me = vectors[0];
+        Vector other = vectors[1];
         Vector result = new Vector(new double[me.getVectorSize()]);
         for (int i = 0; i < me.getVectorSize(); i++) {
             result.setElementatIndex(me.getElementatIndex(i) + other.getElementatIndex(i), i);
@@ -67,13 +80,9 @@ public class Vector {
 
     public Vector subtraction(Vector _v) {
         //TODO_Completed Task 1.8
-        Vector me = this;
-        Vector other = _v;
-        if (other.getVectorSize() > this.getVectorSize())
-            me = me.reSize(other.getVectorSize());
-        else if (this.getVectorSize() > other.getVectorSize()) {
-            other = other.reSize(me.getVectorSize());
-        }
+        Vector[] vectors = makeEqualSize(this, _v);
+        Vector me = vectors[0];
+        Vector other = vectors[1];
         Vector result = new Vector(new double[me.getVectorSize()]);
         for (int i = 0; i < me.getVectorSize(); i++) {
             result.setElementatIndex(me.getElementatIndex(i) - other.getElementatIndex(i), i);
@@ -83,39 +92,39 @@ public class Vector {
 
     public double dotProduct(Vector _v) {
         //TODO_Completed Task 1.9
-        Vector me = this;
-        Vector other = _v;
-        if (other.getVectorSize() > this.getVectorSize())
-            me = me.reSize(other.getVectorSize());
-        else if (this.getVectorSize() > other.getVectorSize()) {
-            other = other.reSize(me.getVectorSize());
-        }
-        double result = 0;
+        Vector[] vectors = makeEqualSize(this, _v);
+        Vector me = vectors[0];
+        Vector other = vectors[1];
+        double result = 0.0;
         for (int i = 0; i < me.getVectorSize(); i++) {
             result += (me.getElementatIndex(i) * other.getElementatIndex(i));
         }
         return result;
     }
 
+    private double computeSimilarity(double[] a, double[] b) {
+        double dotProduct = 0.0d;
+        double normASum = 0.0d;
+        double normBSum = 0.0d;
+
+        for (int i = 0; i < a.length; i++) {
+            dotProduct += a[i] * b[i];
+            normASum += a[i] * a[i];
+            normBSum += b[i] * b[i];
+        }
+        if (normASum <= 0.0 || normBSum <= 0.0) {
+            return 0.0d;
+        }
+        double eucledianDist = (double) (Math.sqrt(normASum) * Math.sqrt(normBSum));
+        return (double) (dotProduct / eucledianDist);
+    }
+
     public double cosineSimilarity(Vector _v) {
         //TODO_Completed Task 1.10
-        Vector me = this;
-        Vector other = _v;
-        if (other.getVectorSize() > this.getVectorSize())
-            me = me.reSize(other.getVectorSize());
-        else if (this.getVectorSize() > other.getVectorSize()) {
-            other = other.reSize(me.getVectorSize());
-        }
-        double result;
-        double dotProduct = me.dotProduct(other);
-        double normA = 0;
-        double normB = 0;
-        for (int i = 0; i < me.getVectorSize(); i++) {
-            normA += me.getElementatIndex(i) * me.getElementatIndex(i);
-            normB += other.getElementatIndex(i) * other.getElementatIndex(i);
-        }
-        result = dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
-        return result;
+        Vector[] vectors = makeEqualSize(this, _v);
+        Vector me = vectors[0];
+        Vector other = vectors[1];
+        return computeSimilarity(me.getAllElements(), other.getAllElements());
     }
 
     @Override
